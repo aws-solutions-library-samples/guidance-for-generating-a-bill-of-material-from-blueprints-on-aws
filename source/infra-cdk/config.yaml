@@ -1,0 +1,12 @@
+stack_name_base: BlueprintAnalyzer
+
+# Optional: Set to automatically create an admin user and email credentials
+admin_user_email: chradavi@amazon.com
+
+backend:
+  pattern: blueprint-analyzer
+  deployment_type: docker
+  network_mode: PUBLIC
+  use_long_term_memory: false
+  ltm_top_k: 10
+  ltm_relevance_score: 0.3

@@ -1,0 +1,15 @@
+# ASH configuration - exclude build artifacts and dependencies to reduce noise
+exclude_paths:
+  - "**/node_modules/**"
+  - "**/venv/**"
+  - "**/.venv/**"
+  - "**/__pycache__/**"
+  - "**/.git/**"
+  - "**/dist/**"
+  - "**/build/**"
+  - "**/cdk.out/**"
+  - "**/.terraform/**"
+  - "**/.kiro/**"
+  - "**/guidance-docs/**"
+  - "**/temp/**"
+  - "**/coverage/**"
