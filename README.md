@@ -292,4 +292,5 @@ For any feedback, questions, or suggestions, please use the [Issues tab](https:/
 ## Authors
 
 - David Christian (Principal Solutions Architect, AWS Industries — Retail/CPG)
+- Daman Orestad (Guidance Solutions Architect, AWS Industries — Retail/CPG)
 - Saurav Bandi (Solutions Architect, HQ-AWS In-Tech&Innovation-AWSI)
