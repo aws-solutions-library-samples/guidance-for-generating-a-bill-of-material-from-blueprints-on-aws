@@ -1,7 +1,7 @@
 stack_name_base: BlueprintAnalyzer
 
 # Optional: Set to automatically create an admin user and email credentials
-admin_user_email: chradavi@amazon.com
+admin_user_email: your-email@example.com
 
 backend:
   pattern: blueprint-analyzer
