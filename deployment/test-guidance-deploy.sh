@@ -16,7 +16,7 @@ set -e
 export AWS_REGION="us-east-1"
 export AWS_DEFAULT_REGION="us-east-1"
 STACK_NAME_BASE="blueprint-analyzer-$(date +%s)"
-EMAIL_ADDRESS="wwso-guidance-deployments-ignore@amazon.com"
+EMAIL_ADDRESS="your-test-email@example.com"
 REPO_URL="https://github.com/aws-solutions-library-samples/guidance-for-generating-a-bill-of-materials-from-blueprints-on-aws.git"
 
 # ============================================
