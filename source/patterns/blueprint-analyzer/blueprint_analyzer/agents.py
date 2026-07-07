@@ -31,14 +31,22 @@ READ_PAGE_IMAGE_TOOL = str(TOOLS_DIR / "read_page_image.py")
 
 REGION = os.environ.get("AWS_DEFAULT_REGION", "us-east-1")
 
+# Bedrock model IDs are configurable via environment variables so they can be
+# updated (e.g. when a model is deprecated) or changed per region without code
+# changes. The defaults below reflect the models this pipeline was built against.
+OPUS_MODEL_ID = os.environ.get("OPUS_MODEL_ID", "us.anthropic.claude-opus-4-6-v1")
+SONNET_MODEL_ID = os.environ.get(
+    "SONNET_MODEL_ID", "us.anthropic.claude-sonnet-4-20250514-v1:0"
+)
+
 OPUS_MODEL = BedrockModel(
-    model_id="us.anthropic.claude-opus-4-6-v1",
+    model_id=OPUS_MODEL_ID,
     region_name=REGION,
     max_tokens=16384,
 )
 
 SONNET_MODEL = BedrockModel(
-    model_id="us.anthropic.claude-sonnet-4-20250514-v1:0",
+    model_id=SONNET_MODEL_ID,
     region_name=REGION,
     max_tokens=8192,
 )

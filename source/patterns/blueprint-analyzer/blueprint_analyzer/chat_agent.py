@@ -18,8 +18,15 @@ logger = logging.getLogger(__name__)
 
 REGION = os.environ.get("AWS_DEFAULT_REGION", "us-east-1")
 
+# Model ID is configurable via environment variable (see agents.py) so it can be
+# updated without code changes when models are deprecated or region portability
+# is needed. Default reflects the model the chat agent was built against.
+SONNET_MODEL_ID = os.environ.get(
+    "SONNET_MODEL_ID", "us.anthropic.claude-sonnet-4-20250514-v1:0"
+)
+
 SONNET_MODEL = BedrockModel(
-    model_id="us.anthropic.claude-sonnet-4-20250514-v1:0",
+    model_id=SONNET_MODEL_ID,
     region_name=REGION,
     max_tokens=8192,
 )
