@@ -31,14 +31,14 @@ def handler(event, context):
             return _list_jobs(event, headers)
         elif method == "GET" and path.startswith("/blueprint/jobs/"):
             job_id = path.split("/")[-1]
-            return _get_job(job_id, headers)
+            return _get_job(event, job_id, headers)
         elif method == "GET" and "/results/" in path and path.endswith("/pages"):
             parts = path.split("/")
             job_id = parts[parts.index("results") + 1]
-            return _get_pages(job_id, headers)
+            return _get_pages(event, job_id, headers)
         elif method == "GET" and path.startswith("/blueprint/results/"):
             job_id = path.split("/")[-1]
-            return _get_results(job_id, headers)
+            return _get_results(event, job_id, headers)
         elif method == "DELETE" and path.startswith("/blueprint/jobs/"):
             job_id = path.split("/")[-1]
             return _delete_job(event, job_id, headers)
@@ -116,7 +116,21 @@ def _list_jobs(event, headers):
     }
 
 
-def _get_job(job_id, headers):
+def _get_authenticated_user_id(event):
+    """Return the Cognito 'sub' claim for the requesting user, or '' if absent."""
+    claims = event.get("requestContext", {}).get("authorizer", {}).get("claims", {})
+    return claims.get("sub", "")
+
+
+def _get_job(event, job_id, headers):
+    user_id = _get_authenticated_user_id(event)
+    if not user_id:
+        return {
+            "statusCode": 401,
+            "headers": headers,
+            "body": json.dumps({"error": "Unauthorized"}),
+        }
+
     resp = table.get_item(Key={"jobId": job_id})
     item = resp.get("Item")
 
@@ -127,6 +141,13 @@ def _get_job(job_id, headers):
             "body": json.dumps({"error": "Job not found"}),
         }
 
+    if item.get("userId") != user_id:
+        return {
+            "statusCode": 403,
+            "headers": headers,
+            "body": json.dumps({"error": "Forbidden"}),
+        }
+
     return {
         "statusCode": 200,
         "headers": headers,
@@ -134,7 +155,15 @@ def _get_job(job_id, headers):
     }
 
 
-def _get_results(job_id, headers):
+def _get_results(event, job_id, headers):
+    user_id = _get_authenticated_user_id(event)
+    if not user_id:
+        return {
+            "statusCode": 401,
+            "headers": headers,
+            "body": json.dumps({"error": "Unauthorized"}),
+        }
+
     resp = table.get_item(Key={"jobId": job_id})
     item = resp.get("Item")
 
@@ -143,6 +172,13 @@ def _get_results(job_id, headers):
             "statusCode": 404,
             "headers": headers,
             "body": json.dumps({"error": "Results not available"}),
+        }
+
+    if item.get("userId") != user_id:
+        return {
+            "statusCode": 403,
+            "headers": headers,
+            "body": json.dumps({"error": "Forbidden"}),
         }
 
     output_prefix = item.get("outputPrefix", "")
@@ -173,8 +209,16 @@ def _get_results(job_id, headers):
     }
 
 
-def _get_pages(job_id, headers):
+def _get_pages(event, job_id, headers):
     """Return per-page analysis, material, and image URLs for a completed job."""
+    user_id = _get_authenticated_user_id(event)
+    if not user_id:
+        return {
+            "statusCode": 401,
+            "headers": headers,
+            "body": json.dumps({"error": "Unauthorized"}),
+        }
+
     resp = table.get_item(Key={"jobId": job_id})
     item = resp.get("Item")
 
@@ -183,6 +227,13 @@ def _get_pages(job_id, headers):
             "statusCode": 404,
             "headers": headers,
             "body": json.dumps({"error": "Results not available"}),
+        }
+
+    if item.get("userId") != user_id:
+        return {
+            "statusCode": 403,
+            "headers": headers,
+            "body": json.dumps({"error": "Forbidden"}),
         }
 
     output_prefix = item.get("outputPrefix", "")
