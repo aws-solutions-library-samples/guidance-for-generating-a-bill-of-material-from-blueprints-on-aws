@@ -10,8 +10,10 @@ readme = "README.md"
 license = { text = "Apache-2.0" }
 requires-python = ">=3.10"
 authors = [
-    { name = "AWS Professional Services", email = "aws-professional-services@amazon.com" },
+    { name = "AWS Professional Services" },
 ]
+# For questions or issues, please use the GitHub Issues page:
+# https://github.com/aws-solutions-library-samples/guidance-for-generating-a-bill-of-material-from-blueprints-on-aws/issues
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
