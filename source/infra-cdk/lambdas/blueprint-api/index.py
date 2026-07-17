@@ -1,12 +1,16 @@
 """Blueprint API Lambda - handles upload URLs, direct uploads, and job queries."""
 
 import json
+import logging
 import os
 import re
 import uuid
 
 import boto3
 from boto3.dynamodb.conditions import Key
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 BUCKET_NAME = os.environ["BLUEPRINT_BUCKET"]
 TABLE_NAME = os.environ["BLUEPRINT_TABLE"]
@@ -48,11 +52,13 @@ def handler(event, context):
                 "headers": headers,
                 "body": json.dumps({"error": "Not found"}),
             }
-    except Exception as e:
+    except Exception:
+        # Log full detail server-side only; return a generic message to the caller
+        logger.exception("Unhandled error in blueprint-api handler")
         return {
             "statusCode": 500,
             "headers": headers,
-            "body": json.dumps({"error": str(e)}),
+            "body": json.dumps({"error": "Internal server error"}),
         }
 
 

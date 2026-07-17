@@ -23,6 +23,11 @@ BUCKET_NAME = os.environ.get("BLUEPRINT_BUCKET")
 TABLE_NAME = os.environ.get("BLUEPRINT_TABLE")
 REGION = os.environ.get("AWS_DEFAULT_REGION", "us-east-1")
 
+# Maximum accepted lengths for untrusted request input, to guard against
+# excessive token consumption and cost/DoS amplification from oversized payloads.
+MAX_PROMPT_CHARS = 100_000
+MAX_KEY_CHARS = 1024
+
 
 @app.entrypoint
 async def invocations(payload, context: RequestContext):
@@ -43,6 +48,9 @@ async def invocations(payload, context: RequestContext):
         if not job_id or not user_query:
             yield {"status": "error", "error": "Missing job_id or prompt for chat mode"}
             return
+        if len(user_query) > MAX_PROMPT_CHARS:
+            yield {"status": "error", "error": "Prompt exceeds the maximum allowed length"}
+            return
         if not BUCKET_NAME:
             yield {"status": "error", "error": "Server misconfigured: BLUEPRINT_BUCKET required"}
             return
@@ -53,9 +61,12 @@ async def invocations(payload, context: RequestContext):
             agent = create_chat_agent(job_id, BUCKET_NAME, REGION)
             async for event in agent.stream_async(user_query):
                 yield json.loads(json.dumps(dict(event), default=str))
-        except Exception as e:
+        except Exception:
             logger.exception("Chat agent failed for job %s", job_id)
-            yield {"status": "error", "error": str(e)}
+            yield {
+                "status": "error",
+                "error": "An internal error occurred while processing your request.",
+            }
         return
 
     user_id = extract_user_id_from_context(context)
@@ -64,6 +75,9 @@ async def invocations(payload, context: RequestContext):
 
     if not pdf_key:
         yield {"status": "error", "error": "Missing required field: pdf_key"}
+        return
+    if len(pdf_key) > MAX_KEY_CHARS:
+        yield {"status": "error", "error": "pdf_key exceeds the maximum allowed length"}
         return
 
     if not BUCKET_NAME or not TABLE_NAME:
@@ -93,9 +107,13 @@ async def invocations(payload, context: RequestContext):
         ):
             yield json.loads(json.dumps(event, default=str))
 
-    except Exception as e:
+    except Exception:
         logger.exception("Pipeline failed for job %s", job_id)
-        yield {"type": "error", "job_id": job_id, "error": str(e)}
+        yield {
+            "type": "error",
+            "job_id": job_id,
+            "error": "An internal error occurred during analysis.",
+        }
 
 
 if __name__ == "__main__":

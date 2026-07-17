@@ -8,6 +8,10 @@ from collections import Counter
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+# Maximum accepted length (characters) for untrusted tool input. Guards against
+# excessive processing and cost/DoS amplification from oversized payloads.
+MAX_TEXT_CHARS = 100_000
+
 
 def analyze_text(text: str, n: int = 5) -> str:
     """
@@ -83,6 +87,16 @@ def handler(event, context):
             text = event.get("text", "")
             N = event.get("N", 5)
 
+            # Reject oversized untrusted input before processing
+            if not isinstance(text, str) or len(text) > MAX_TEXT_CHARS:
+                logger.warning(
+                    "Rejected text input: type=%s length=%s (max %d)",
+                    type(text).__name__,
+                    len(text) if isinstance(text, str) else "n/a",
+                    MAX_TEXT_CHARS,
+                )
+                return {"error": "Input text is missing or exceeds the maximum allowed length"}
+
             # Analyze text
             result = analyze_text(text, N)
 
@@ -94,6 +108,7 @@ def handler(event, context):
                 "error": f"This Lambda only supports 'text_analysis_tool', received: {tool_name}"
             }
 
-    except Exception as e:
-        logger.error(f"Error processing request: {str(e)}")
-        return {"error": f"Internal server error: {str(e)}"}
+    except Exception:
+        # Log full detail server-side only; return a generic message to the caller
+        logger.exception("Error processing request")
+        return {"error": "Internal server error"}
