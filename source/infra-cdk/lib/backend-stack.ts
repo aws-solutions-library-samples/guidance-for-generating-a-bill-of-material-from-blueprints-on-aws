@@ -103,7 +103,7 @@ export class BackendStack extends cdk.NestedStack {
   }
 
   private createAgentCoreRuntime(config: AppConfig): void {
-    const pattern = config.backend?.pattern || "strands-single-agent"
+    const pattern = config.backend?.pattern || "blueprint-analyzer"
 
     // Parameters
     this.agentName = new cdk.CfnParameter(this, "AgentName", {
@@ -118,16 +118,6 @@ export class BackendStack extends cdk.NestedStack {
     // Create the agent runtime artifact based on deployment type
     let agentRuntimeArtifact: agentcore.AgentRuntimeArtifact
     let zipPackagerResource: cdk.CustomResource | undefined
-
-    if (
-      deploymentType === "zip" &&
-      (pattern === "claude-agent-sdk-single-agent" || pattern === "claude-agent-sdk-multi-agent")
-    ) {
-      throw new Error(
-        "claude-agent-sdk patterns require Docker deployment (deployment_type: docker) " +
-          "because they need Node.js and the claude-code CLI installed at build time."
-      )
-    }
 
     if (deploymentType === "zip") {
       // ZIP DEPLOYMENT: Use Lambda to package and upload to S3 (no Docker required)
@@ -366,11 +356,6 @@ export class BackendStack extends cdk.NestedStack {
       // See config.yaml: ltm_top_k and ltm_relevance_score.
       LTM_TOP_K: String(config.backend.ltm_top_k),
       LTM_RELEVANCE_SCORE: String(config.backend.ltm_relevance_score),
-    }
-
-    // Add claude-agent-sdk specific environment variable
-    if (pattern === "claude-agent-sdk-single-agent" || pattern === "claude-agent-sdk-multi-agent") {
-      envVars["CLAUDE_CODE_USE_BEDROCK"] = "1"
     }
 
     // Blueprint analyzer environment variables

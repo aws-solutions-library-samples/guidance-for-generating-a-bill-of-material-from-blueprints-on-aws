@@ -49,7 +49,7 @@ export default function ChatInterface() {
         const agentClient = new AgentCoreClient({
           runtimeArn: config.agentRuntimeArn,
           region: config.awsRegion || "us-east-1",
-          pattern: (config.agentPattern || "strands-single-agent") as AgentPattern,
+          pattern: (config.agentPattern || "blueprint-analyzer") as AgentPattern,
         })
 
         setClient(agentClient)

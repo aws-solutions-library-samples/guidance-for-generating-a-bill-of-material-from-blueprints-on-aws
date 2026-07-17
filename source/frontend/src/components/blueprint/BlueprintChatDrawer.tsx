@@ -39,7 +39,7 @@ export default function BlueprintChatDrawer({ jobId, open, onOpenChange }: Bluep
         const agentClient = new AgentCoreClient({
           runtimeArn: config.agentRuntimeArn,
           region: config.awsRegion || "us-east-1",
-          pattern: (config.agentPattern || "strands-single-agent") as AgentPattern,
+          pattern: (config.agentPattern || "blueprint-analyzer") as AgentPattern,
         })
         setClient(agentClient)
       } catch (err) {

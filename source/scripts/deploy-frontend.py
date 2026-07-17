@@ -124,7 +124,7 @@ def parse_config_yaml(config_path: Path) -> Dict[str, str]:
     Returns:
         Dictionary with stack_name_base and pattern values
     """
-    config = {"stack_name_base": "", "pattern": "strands-single-agent"}
+    config = {"stack_name_base": "", "pattern": "blueprint-analyzer"}
 
     if not config_path.exists():
         return config
@@ -488,7 +488,7 @@ def main() -> int:
 
     # Get agent pattern from config
     config = parse_config_yaml(config_path)
-    pattern = config.get("pattern", "strands-single-agent")
+    pattern = config.get("pattern", "blueprint-analyzer")
     log_info(f"Agent pattern: {pattern}")
 
     # Generate aws-exports.json
