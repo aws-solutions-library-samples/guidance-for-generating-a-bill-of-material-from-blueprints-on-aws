@@ -190,10 +190,16 @@ describe("Configuration Verification Tests", () => {
       expect(indexHtml).toContain("favicon.ico")
     })
 
-    it("should have Google Fonts preconnect links", () => {
+    it("should self-host fonts via @fontsource and not use external Google Fonts", () => {
       const indexHtml = readFileSync(resolve(__dirname, "../../index.html"), "utf-8")
-      expect(indexHtml).toContain("fonts.googleapis.com")
-      expect(indexHtml).toContain("fonts.gstatic.com")
+      // Fonts were migrated off the external Google Fonts CDN for privacy and availability.
+      expect(indexHtml).not.toContain("fonts.googleapis.com")
+      expect(indexHtml).not.toContain("fonts.gstatic.com")
+
+      // Fonts are now bundled locally and imported in main.tsx.
+      const mainTsx = readFileSync(resolve(__dirname, "../main.tsx"), "utf-8")
+      expect(mainTsx).toContain("@fontsource/geist-sans")
+      expect(mainTsx).toContain("@fontsource/geist-mono")
     })
   })
 })
